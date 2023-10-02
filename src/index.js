@@ -1,84 +1,47 @@
-// Your code here
-// Loads Function when Content has loaded
-document.addEventListener('DOMContentLoaded', () => {
-    const characterBar = document.querySelector('#character-bar');
-    const characterInfo = document.querySelector('.characterInfo');
-  
-    function showAnimalDetails(animal) {
-      // Clear previous details
-      characterInfo.innerHTML = '';
-  
-      // Create elements for the animal details
-      const name = document.createElement('p');
-      name.textContent = animal.name;
-  
-      const image = document.createElement('img');
-      image.src = animal.image;
-      image.alt = animal.name;
-  
-      const voteCount = document.createElement('h4');
-      voteCount.textContent = `Total Votes: ${animal.votes}`;
-  
-      // Create a form to add votes
-      const votesForm = document.createElement('form');
-      votesForm.id = 'votes-form';
-  
-      const votesInput = document.createElement('input');
-      votesInput.type = 'text';
-      votesInput.placeholder = 'Enter Votes';
-      votesInput.id = 'votes';
-      votesInput.name = 'votes';
-  
-      const submitButton = document.createElement('input');
-      submitButton.type = 'submit';
-      submitButton.value = 'Add Votes';
+// Function for rendering all the characters individually
+const renderingCharacters = () =>{
+  const characters= document.getElementById('character-bar')
 
-      // Append elements to the character details section
-      votesForm.appendChild(votesInput);
-      votesForm.appendChild(submitButton);
-  
-      characterInfo.appendChild(name);
-      characterInfo.appendChild(image);
-      characterInfo.appendChild(voteCount);
-      characterInfo.appendChild(votesForm);
+  fetch('http://localhost:3000/characters')
 
-      // Handle form submission to add votes
-      votesForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const votesToAdd = parseInt(votesInput.value) || 0;
-  
-        // Update the vote count
-        animal.votes += votesToAdd;
-        voteCount.textContent = `Total Votes: ${animal.votes}`;
-  
-        // Clear the input field
-        votesInput.value = '';
-      });
+  .then(response=> response.json())
+// Iterates through each anumala and passes a function to them
+  .then(data=>{
+    data.forEach(animal => {
+      // Creates a new element to display a list of animals
+      const characterList = document.createElement('li')
+      characterList.textContent = animal.name;
+      // Creates a function for what happens when an animal is clicked
+      characterList.addEventListener('click', () => {
+        console.log('click', animal.name )
+        // Creates variable for image,name and vote
+        const characterImage = document.getElementById("image")
+        const characterName = document.getElementById("name")
+        const characterVote = document.getElementById('vote-count')
+        // Assigns value to the variables from server
+        characterImage.src = animal.image;
+        characterName.innerText = animal.name;
+        characterVote.innerText = animal.votes;
 
-    }
+        let currentVote = parseInt(characterVote.textContent, 10);
+       
+        const form =  document.getElementById("votes-form")
+        const voteInput = document.getElementById("votes")
+        // Function for adding votes
+        form.addEventListener('submit',(e)=> {
 
-  // Fetches Data from the server
-    function fetchAnimals() {
-      fetch('http://localhost:3000/characters')
-        .then((res) => res.json())
-        .then((animals) => {
-          // Create a list of animal names
-          animals.forEach((animal) => {
-            const animalName = document.createElement('li');
-            animalName.className = 'characterList';
-            animalName.textContent = animal.name;
-  
-            // Handle click event to show details
-            animalName.addEventListener('click', () => {
-              showAnimalDetails(animal);
-            });
-  
+          e.preventDefault () 
+          let newVote = parseInt(voteInput.value, 10);
+          currentVote += newVote;
+          characterVote.textContent = currentVote;
+          form.reset();
+        
+        })
+      })
 
-            characterBar.appendChild(animalName);
-          });
-        });
-    }
-  
-    // Initialize the app
-    fetchAnimals();
-});
+      characters.appendChild(characterList)
+    })
+  });
+
+}
+renderingCharacters();
